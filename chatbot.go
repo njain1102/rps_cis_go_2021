@@ -2,36 +2,41 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"strconv"
 	"sync"
 )
-
+var c1 chan string = make(chan string)
+var c2 chan string= make(chan string)
+var c3 chan string= make(chan string)
 var waitGroup sync.WaitGroup
-
-func user(c chan string){
-    c<-"How to open an account"
-    umsg:=<-c
-    fmt.Println(umsg)
-	if len(umsg)>0{
-		defer waitGroup.Done()
-	}
+//sender
+func user(c chan <-string,id int){
+    defer waitGroup.Done()
+	c<-"How to open an account?"+strconv.Itoa(id)
 }
+//receiver
+func bot(){
 
-func bot(c chan string){
-
-     msg:=<-c
-     fmt.Println(msg)
-    if len(msg)>0{
-    	defer waitGroup.Done()
+	for {
+		select {
+		case msg1 := <- c1:
+			fmt.Println(msg1)
+		case msg2 := <- c2:
+			fmt.Println(msg2)
+		case msg3 := <- c3:
+			fmt.Println(msg3)
+		}
 	}
-     c<-"Please open https://hdfcbank.com/" +
-     	"accounts guide"
+
 }
 
 func main() {
-	var c chan string = make(chan string)
-     waitGroup.Add(2)
-	 go bot(c)
-	 go user(c)
+     waitGroup.Add(3)
+	 go bot()
+	 go user(c1,rand.Int())
+	 go user(c2,rand.Int())
+	 go user(c3,rand.Int())
 	waitGroup.Wait()
 
 }
